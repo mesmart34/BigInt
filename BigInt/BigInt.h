@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
 
 class BigInt
 {
@@ -13,13 +14,22 @@ public:
 	int GetSize() const;
 	int GetSign() const;
 
-	BigInt operator+(const BigInt& bigint);
-	BigInt operator-(const BigInt& bigint);
-	bool operator==(const BigInt& bigint);
-private:
-	BigInt Sum(const BigInt& a, const BigInt& b);
-	BigInt Sub(const BigInt& a, const BigInt& b);
 
+	BigInt operator+(const BigInt& bigint);
+	BigInt operator*(const BigInt& bigint);
+	BigInt operator*(const int d);
+	BigInt operator-(const BigInt& bigint);
+	BigInt operator-();
+	bool operator==(const BigInt& bigint);
+
+	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);
+
+private:
+	void EraseLeadingZeros(std::vector<int>& v);
+	int Div(const int a, const int b) const;
+	int Mod(const int a, const int b) const;
+
+private:
 	std::vector<int> m_data;
 	int m_sign;
 };

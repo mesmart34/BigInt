@@ -54,13 +54,152 @@ namespace BigIntTest
 			Assert::IsTrue(bigint.GetSign() == -1);
 		}
 
-		TEST_METHOD(TestSum)
+		TEST_METHOD(TestSum1)
 		{
-			auto bigint1 = BigInt(std::vector<int> {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9}, 1);
-			auto bigint2 = BigInt(std::vector<int> {9, 9, 9, 9, 9, 9}, 1);
+			auto bigint1 = BigInt(std::vector<int> {1, 1, 5, 2}, 1);
+			auto bigint2 = BigInt(std::vector<int> {7, 4}, 1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{1, 2, 2, 6}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum2)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 1, 5, 2}, 1);
+			auto bigint2 = BigInt(std::vector<int> {0}, 1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{1, 1, 5, 2}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum3)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 1, 5, 2}, 1);
+			auto bigint2 = BigInt(std::vector<int> {1, 1, 5, 2}, 1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{2, 3, 0, 4}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum4)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9, 9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9}, 1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{1, 0, 0, 9, 8}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum5)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9}, 1);
 			auto sum = bigint1 + bigint2;
 			auto expected = BigInt(std::vector<int>{1, 9, 8}, 1);
 			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum6)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9}, 1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{1, 9, 8}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum7)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5}, -1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{4}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum8)
+		{
+			auto bigint1 = BigInt(std::vector<int> {3}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5}, -1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{2}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSum9)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9}, -1);
+			auto sum = bigint1 + bigint2;
+			auto expected = BigInt(std::vector<int>{9, 0, 0}, 1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(Equal1)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9}, -1);
+			Assert::IsFalse(bigint1 == bigint2);
+		}
+
+		TEST_METHOD(Equal2)
+		{
+			auto bigint1 = BigInt(std::vector<int> {9, 9, 9}, 1);
+			auto bigint2 = BigInt(std::vector<int> {9, 9, 9}, 1);
+			Assert::IsTrue(bigint1 == bigint2);
+		}
+
+		TEST_METHOD(TestSub1)
+		{
+			auto bigint1 = BigInt(std::vector<int> {3}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5}, -1);
+			auto sum = bigint1 - bigint2;
+			auto expected = BigInt(std::vector<int>{8}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSub2)
+		{
+			auto bigint1 = BigInt(std::vector<int> {3}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5}, 1);
+			auto sum = bigint1 - bigint2;
+			auto expected = BigInt(std::vector<int>{2}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSub3)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 0}, 1);
+			auto bigint2 = BigInt(std::vector<int> {1, 2, 5}, 1);
+			auto sum = bigint1 - bigint2;
+			auto expected = BigInt(std::vector<int>{1, 1, 5}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSub4)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 0, 0, 0}, 1);
+			auto bigint2 = BigInt(std::vector<int> {2, 0, 0, 0}, -1);
+			auto sum = bigint1 - bigint2;
+			auto expected = BigInt(std::vector<int>{3, 0, 0, 0}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestSub5)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 0, 0, 0}, 1);
+			auto bigint2 = BigInt(std::vector<int> {2, 0, 0, 0}, 1);
+			auto sum = bigint1 - bigint2;
+			auto expected = BigInt(std::vector<int>{1, 0, 0, 0}, -1);
+			Assert::IsTrue(sum.GetData() == expected.GetData());
+		}
+
+		TEST_METHOD(TestMult10)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 0, 0, 0}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5, 0, 0, 0}, 1);
+			bigint1 = bigint1 * 5;
+			Assert::IsTrue(bigint1 == bigint2);
 		}
 	};
 }

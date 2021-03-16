@@ -1,10 +1,10 @@
 #include "BigInt.h"
-
+#include <iostream>
 int main(int argc, char** argv)
 {
-	auto bigint1 = BigInt("12");
-	auto bigint2 = BigInt("34");
-	auto sum = bigint1 + bigint2;
-	auto expected = BigInt(std::vector<int>{4, 6}, 1);
+	auto n1 = BigInt("1000");
+	auto n2 = BigInt("2000");
+	auto result = (n1 - n2) * 5;
+	std::cout << result << std::endl;
 	return(0);
 }
