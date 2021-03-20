@@ -20,6 +20,7 @@ public:
 	BigInt operator*(const int d);
 	BigInt operator-(const BigInt& bigint);
 	BigInt operator-();
+	BigInt multByTen(int power);
 	bool operator==(const BigInt& bigint);
 
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);

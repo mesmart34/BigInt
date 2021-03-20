@@ -104,12 +104,12 @@ BigInt BigInt::operator+(const BigInt& bigint)
 			}
 
 			int i;
-			for (i = 0; i < size - 1; i++)	// ищем первую ненулевую цифру, кроме последней цифры
+			for (i = 0; i < size - 1; i++)	
 				if (digits[i] != 0)
 					break;
 
-			if (i > 0)   // есть ведущие нули
-				digits.erase(digits.begin(), digits.begin() + i);// удаляем ведущие нули, кроме возможно, последнего
+			if (i > 0)  
+				digits.erase(digits.begin(), digits.begin() + i);
 
 		}
 		if (sign == 1)
@@ -138,7 +138,17 @@ BigInt BigInt::operator*(const int d)
 
 BigInt BigInt::operator*(const BigInt& bigint)
 {
-	return BigInt();
+	
+	auto sum = BigInt();
+	auto temp = BigInt();
+	for (auto i = 0; i < bigint.GetSize(); i++)
+	{
+		temp = *this * bigint.m_data[i];
+		temp = temp.multByTen(bigint.GetSize() - i - 1);
+		sum = sum + temp;
+	}
+	sum.m_sign = m_sign * bigint.m_sign;
+	return sum;
 }
 
 BigInt BigInt::operator-(const BigInt& bigint)
@@ -150,6 +160,14 @@ BigInt BigInt::operator-(const BigInt& bigint)
 BigInt BigInt::operator-()
 {
 	return BigInt(this->GetData(), this->GetSign() * -1);
+}
+
+BigInt BigInt::multByTen(int power)
+{
+	std::vector<int> digits{m_data};
+	for (auto i = 0; i < power; i++)
+		digits.push_back(0);
+	return BigInt(digits, this->m_sign);
 }
 
 void BigInt::EraseLeadingZeros(std::vector<int>& v)

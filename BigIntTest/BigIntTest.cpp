@@ -194,12 +194,29 @@ namespace BigIntTest
 			Assert::IsTrue(sum.GetData() == expected.GetData());
 		}
 
-		TEST_METHOD(TestMult10)
+		TEST_METHOD(TestMult1)
 		{
 			auto bigint1 = BigInt(std::vector<int> {1, 0, 0, 0}, 1);
 			auto bigint2 = BigInt(std::vector<int> {5, 0, 0, 0}, 1);
 			bigint1 = bigint1 * 5;
 			Assert::IsTrue(bigint1 == bigint2);
+		}
+
+
+		TEST_METHOD(TestMult2)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 1, 1}, 1);
+			auto bigint2 = BigInt(std::vector<int> {5}, 1);
+			auto result = bigint1 * bigint2;
+			Assert::IsTrue(result == BigInt({5, 5, 5}, 1));
+		}
+
+		TEST_METHOD(TestMult3)
+		{
+			auto bigint1 = BigInt(std::vector<int> {1, 2, 8, 1}, 1);
+			auto bigint2 = BigInt(std::vector<int> {3, 2, 5}, -1);
+			auto result = bigint1 * bigint2;
+			Assert::IsTrue(result == BigInt({ 4, 1, 6, 3, 2, 5}, -1));
 		}
 	};
 }
