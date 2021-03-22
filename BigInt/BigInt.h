@@ -8,7 +8,8 @@ class BigInt
 {
 public:
 	BigInt(std::vector<int> data, int sign);
-	BigInt(std::string data);
+	BigInt(const std::string& data);
+	BigInt(const char* data);
 
 	std::vector<int> GetData() const;
 	int GetSize() const;
@@ -19,13 +20,19 @@ public:
 	BigInt operator*(const BigInt& bigint);
 	BigInt operator*(const int d);
 	BigInt operator-(const BigInt& bigint);
+	BigInt operator/(const BigInt& bigint);
+	BigInt operator%(const BigInt& bigint);
+	bool operator<(const BigInt& bigint);
+	bool operator>(const BigInt& bigint);
 	BigInt operator-();
 	BigInt multByTen(int power);
 	bool operator==(const BigInt& bigint);
+	bool operator!=(const BigInt& bigint);
 
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);
 
 private:
+	void StringToData(const std::string& str);
 	void EraseLeadingZeros(std::vector<int>& v);
 	int Div(const int a, const int b) const;
 	int Mod(const int a, const int b) const;

@@ -3,21 +3,14 @@
 BigInt::BigInt(std::vector<int> data = {0}, int sign = 1)
 	: m_data(data), m_sign(sign) { }
 
-BigInt::BigInt(std::string data)
+BigInt::BigInt(const std::string& data)
 {
-	m_sign = 1;
-	m_data = std::vector<int>();
-	if (data.at(0) == '-')
-	{
-		m_sign = -1;
-		if (data.size() == 1)
-			return;
-	}
-	m_data.reserve(data.size());
-	for (auto i = m_sign < 0 ? 1 : 0; i < data.size(); i++)
-	{
-		m_data.push_back((int)data.at(i) - 48);
-	}
+	StringToData(data);
+}
+
+BigInt::BigInt(const char* data)
+{
+	StringToData({ data });
 }
 
 std::vector<int> BigInt::GetData() const
@@ -33,6 +26,18 @@ int BigInt::GetSize() const
 int BigInt::GetSign() const
 {
 	return m_sign;
+}
+
+bool BigInt::operator>(const BigInt& bigint)
+{
+	auto res = *this - bigint;
+	return res.m_sign == 1 && res != "0";
+}
+
+bool BigInt::operator<(const BigInt& bigint)
+{
+	auto res = *this - bigint;
+	return res.m_sign == -1 && res != "0";
 }
 
 int BigInt::Div(const int a, const int b) const
@@ -110,16 +115,23 @@ BigInt BigInt::operator+(const BigInt& bigint)
 
 			if (i > 0)  
 				digits.erase(digits.begin(), digits.begin() + i);
-
+			if (sign == 1)
+				sign = -1;
+			else
+				sign = 1;
 		}
-		if (sign == 1)
-			sign = 1;
 		else
-			sign = -1;
+		{
+			sign = 1;
+			digits = { 0 };
+		}
+
 	}
 
-	EraseLeadingZeros(digits);
-
+	if (digits.size() == 0)
+		digits.push_back(0);
+	else
+		EraseLeadingZeros(digits);
 	return BigInt(digits, sign);
 }
 
@@ -162,12 +174,66 @@ BigInt BigInt::operator-()
 	return BigInt(this->GetData(), this->GetSign() * -1);
 }
 
+BigInt BigInt::operator/(const BigInt& bigint)
+{
+	if (GetSize() < bigint.GetSize())
+		throw "Second number has more digits!";
+	if (BigInt("0") == bigint)
+		throw "Division by zero!";
+
+	auto temp = *this;
+	auto subtrahend = BigInt(bigint.GetData(), 1);
+
+	auto result = BigInt("0");
+	temp.m_sign = 1;
+
+	while (temp > "0")
+	{
+		temp = temp - subtrahend;
+		result = result + "1";
+	}
+	if (temp < "0")
+		result = result - "1";
+	result.m_sign = m_sign * bigint.m_sign;
+	return result;
+}
+
+BigInt BigInt::operator%(const BigInt& bigint)
+{
+	auto division = *this / bigint;
+	auto temp = const_cast<BigInt&>(bigint) * (division.m_sign == 1 ? division : division - "1");
+	auto mod = *this - temp;
+	return mod;
+}
+
 BigInt BigInt::multByTen(int power)
 {
 	std::vector<int> digits{m_data};
 	for (auto i = 0; i < power; i++)
 		digits.push_back(0);
 	return BigInt(digits, this->m_sign);
+}
+
+bool BigInt::operator!=(const BigInt& bigint)
+{
+	return (GetData() != const_cast<BigInt&>(bigint).GetData()) || (bigint.GetSign() != GetSign());
+}
+
+void BigInt::StringToData(const std::string& str)
+{
+	m_sign = 1;
+	m_data = std::vector<int>();
+	if (str.at(0) == '-')
+	{
+		m_sign = -1;
+		if (str.size() == 1)
+			return;
+	}
+	m_data.reserve(str.size());
+	for (auto i = m_sign < 0 ? 1 : 0; i < str.size(); i++)
+	{
+		m_data.push_back((int)str.at(i) - 48);
+	}
 }
 
 void BigInt::EraseLeadingZeros(std::vector<int>& v)
@@ -184,7 +250,8 @@ void BigInt::EraseLeadingZeros(std::vector<int>& v)
 
 bool BigInt::operator==(const BigInt& bigint)
 {
-	return (GetData() == const_cast<BigInt&>(bigint).GetData()) && (bigint.GetSign() == GetSign());
+	auto result = *this - bigint;
+	return result.m_data == std::vector<int>{0};
 }
 
 std::ostream& operator<<(std::ostream& os, const BigInt& bigint)
