@@ -55,6 +55,34 @@ int BigInt::Mod(const int a, const int b) const
 	return a - b * Div(a, b);
 }
 
+std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& bigint)
+{
+	if (GetSize() < bigint.GetSize())
+		throw "Second number has more digits!";
+	if (BigInt("0") == bigint)
+		throw "Division by zero!";
+
+	auto reminder = *this;
+	auto subtrahend = BigInt(bigint.GetData(), 1);
+
+	auto result = BigInt("0");
+	reminder.m_sign = 1;
+
+	while (reminder > "0")
+	{
+		reminder = reminder - subtrahend;
+		result = result + "1";
+	}
+	if (reminder < "0")
+	{
+		result = result - "1";
+		reminder = subtrahend + reminder;
+	}
+	reminder.m_sign = this->m_sign;
+	result.m_sign = m_sign * bigint.m_sign;
+	return std::tuple<BigInt, BigInt>(result, reminder);
+}
+
 BigInt BigInt::operator+(const BigInt& bigint)
 {
 	auto digits = std::vector<int>();
@@ -176,34 +204,12 @@ BigInt BigInt::operator-()
 
 BigInt BigInt::operator/(const BigInt& bigint)
 {
-	if (GetSize() < bigint.GetSize())
-		throw "Second number has more digits!";
-	if (BigInt("0") == bigint)
-		throw "Division by zero!";
-
-	auto temp = *this;
-	auto subtrahend = BigInt(bigint.GetData(), 1);
-
-	auto result = BigInt("0");
-	temp.m_sign = 1;
-
-	while (temp > "0")
-	{
-		temp = temp - subtrahend;
-		result = result + "1";
-	}
-	if (temp < "0")
-		result = result - "1";
-	result.m_sign = m_sign * bigint.m_sign;
-	return result;
+	return std::get<0>(Divide(bigint));
 }
 
 BigInt BigInt::operator%(const BigInt& bigint)
 {
-	auto division = *this / bigint;
-	auto temp = const_cast<BigInt&>(bigint) * (division.m_sign == 1 ? division : division - "1");
-	auto mod = *this - temp;
-	return mod;
+	return std::get<1>(Divide(bigint));
 }
 
 BigInt BigInt::multByTen(int power)
@@ -217,6 +223,11 @@ BigInt BigInt::multByTen(int power)
 bool BigInt::operator!=(const BigInt& bigint)
 {
 	return (GetData() != const_cast<BigInt&>(bigint).GetData()) || (bigint.GetSign() != GetSign());
+}
+
+BigInt BigInt::Abs(const BigInt& bigint)
+{
+	return BigInt(bigint.GetData(), 1);
 }
 
 void BigInt::StringToData(const std::string& str)

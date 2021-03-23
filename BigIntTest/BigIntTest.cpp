@@ -261,6 +261,14 @@ namespace BigIntTest
 			Assert::IsTrue(result == "-22");
 		}
 
+		TEST_METHOD(TestDiv4)
+		{
+			auto bigint1 = BigInt("-5000");
+			auto bigint2 = BigInt("225");
+			auto result = bigint1 / bigint2;
+			Assert::IsTrue(result == "-22");
+		}
+
 		TEST_METHOD(TestComparing1)
 		{
 			auto bigint1 = BigInt(std::vector<int> {1, 2, 8, 1}, 1);
@@ -290,7 +298,7 @@ namespace BigIntTest
 			auto bigint1 = BigInt(std::vector<int> {1, 2, 8, 1}, 1);
 			auto bigint2 = BigInt(std::vector<int> {3, 2, 5}, -1);
 			auto result = bigint1 % bigint2;
-			Assert::IsTrue(result == BigInt("-19"));
+			Assert::IsTrue(result == BigInt("306"));
 		}
 
 		TEST_METHOD(TestMod2)
@@ -307,6 +315,22 @@ namespace BigIntTest
 			auto bigint2 = BigInt(std::vector<int> {3, 2, 5}, 1);
 			auto result = bigint1 % bigint2;
 			Assert::IsTrue(result == BigInt("306"));
+		}
+
+		TEST_METHOD(TestMod4)
+		{
+			auto bigint1 = BigInt("-10");
+			auto bigint2 = BigInt("20");
+			auto result = bigint1 % bigint2;
+			Assert::IsTrue(result == BigInt("-10"));
+		}
+
+		TEST_METHOD(TestMod5)
+		{
+			auto bigint1 = BigInt("-45");
+			auto bigint2 = BigInt("20");
+			auto result = bigint1 % bigint2;
+			Assert::IsTrue(result == BigInt("-5"));
 		}
 
 	};
