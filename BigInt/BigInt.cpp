@@ -36,7 +36,8 @@ bool BigInt::operator>(const BigInt& bigint)
 
 bool BigInt::operator<(const BigInt& bigint)
 {
-	auto res = *this - bigint;
+	auto temp = *this;
+	auto res = temp - bigint;
 	return res.m_sign == -1 && res != "0";
 }
 
@@ -58,7 +59,7 @@ int BigInt::Mod(const int a, const int b) const
 std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& bigint)
 {
 	if (GetSize() < bigint.GetSize())
-		throw "Second number has more digits!";
+		return std::tuple<BigInt, BigInt>("0", *this);
 	if (BigInt("0") == bigint)
 		throw "Division by zero!";
 
@@ -80,6 +81,8 @@ std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& bigint)
 	}
 	reminder.m_sign = this->m_sign;
 	result.m_sign = m_sign * bigint.m_sign;
+	EraseLeadingZeros(result.m_data);
+	EraseLeadingZeros(reminder.m_data);
 	return std::tuple<BigInt, BigInt>(result, reminder);
 }
 
@@ -160,6 +163,7 @@ BigInt BigInt::operator+(const BigInt& bigint)
 		digits.push_back(0);
 	else
 		EraseLeadingZeros(digits);
+
 	return BigInt(digits, sign);
 }
 
@@ -220,6 +224,11 @@ BigInt BigInt::multByTen(int power)
 	return BigInt(digits, this->m_sign);
 }
 
+BigInt BigInt::Mod(BigInt& m)
+{
+	return *this - m * (*this / m);
+}
+
 bool BigInt::operator!=(const BigInt& bigint)
 {
 	return (GetData() != const_cast<BigInt&>(bigint).GetData()) || (bigint.GetSign() != GetSign());
@@ -228,6 +237,35 @@ bool BigInt::operator!=(const BigInt& bigint)
 BigInt BigInt::Abs(const BigInt& bigint)
 {
 	return BigInt(bigint.GetData(), 1);
+}
+
+BigInt BigInt::multInv(const BigInt& e, const BigInt& t)
+{
+	BigInt d;
+	BigInt k = "1";
+
+	while (true)
+	{
+		k = k + t;
+
+		if (k % e == "0")
+		{
+			d = (k / e);
+			return d;
+		}
+	}
+}
+
+int BigInt::toBin() const
+{
+	auto result = 0;
+	auto index = m_data.size() - 1;
+	for (auto i = m_data.begin(); i < m_data.end(); i++) 
+	{
+		result += pow(10, index) * *i;
+		index -= 1;
+	}
+	return result;
 }
 
 void BigInt::StringToData(const std::string& str)
@@ -243,8 +281,12 @@ void BigInt::StringToData(const std::string& str)
 	m_data.reserve(str.size());
 	for (auto i = m_sign < 0 ? 1 : 0; i < str.size(); i++)
 	{
-		m_data.push_back((int)str.at(i) - 48);
+		auto symbol = (int)str.at(i) - 48;
+		if (symbol < 0 || symbol > 9)
+			throw "Out of range";
+		m_data.push_back(symbol);
 	}
+	EraseLeadingZeros(m_data);
 }
 
 void BigInt::EraseLeadingZeros(std::vector<int>& v)

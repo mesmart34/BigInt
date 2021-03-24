@@ -269,6 +269,14 @@ namespace BigIntTest
 			Assert::IsTrue(result == "-22");
 		}
 
+		TEST_METHOD(TestDiv5)
+		{
+			auto bigint1 = BigInt("10");
+			auto bigint2 = BigInt("20");
+			auto result = bigint1 / bigint2;
+			Assert::IsTrue(result == "0");
+		}
+
 		TEST_METHOD(TestComparing1)
 		{
 			auto bigint1 = BigInt(std::vector<int> {1, 2, 8, 1}, 1);
@@ -327,10 +335,43 @@ namespace BigIntTest
 
 		TEST_METHOD(TestMod5)
 		{
+			auto bigint1 = BigInt("10");
+			auto bigint2 = BigInt("200");
+			auto result = bigint1 % bigint2;
+			Assert::IsTrue(result == BigInt("10"));
+		}
+
+		TEST_METHOD(TestModulo1)
+		{
 			auto bigint1 = BigInt("-45");
 			auto bigint2 = BigInt("20");
-			auto result = bigint1 % bigint2;
+			auto result = bigint1.Mod(bigint2);
 			Assert::IsTrue(result == BigInt("-5"));
+		}
+
+		TEST_METHOD(TestModulo2)
+		{
+			auto bigint1 = BigInt("-45");
+			auto bigint2 = BigInt("20");
+			auto result = bigint1.Mod(bigint2);
+			Assert::IsTrue(result == BigInt("-5"));
+		}
+
+
+		TEST_METHOD(TestMultInv1)
+		{
+			auto bigint1 = BigInt("3");
+			auto bigint2 = BigInt("26");
+			auto result = BigInt::multInv(bigint1, bigint2);
+			Assert::IsTrue(result == BigInt("9"));
+		}
+
+		TEST_METHOD(TestMultInv2)
+		{
+			auto bigint1 = BigInt("3");
+			auto bigint2 = BigInt("28");
+			auto result = BigInt::multInv(bigint1, bigint2);
+			Assert::IsTrue(result == BigInt("19"));
 		}
 
 	};

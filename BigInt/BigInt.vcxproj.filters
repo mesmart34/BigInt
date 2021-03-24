@@ -21,9 +21,21 @@
     <ClCompile Include="BigInt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RSA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StringEncoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigInt.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RSA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StringEncoder.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

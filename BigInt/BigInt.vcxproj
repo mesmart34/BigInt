@@ -141,9 +141,13 @@
   <ItemGroup>
     <ClCompile Include="BigInt.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RSA.cpp" />
+    <ClCompile Include="StringEncoder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BigInt.h" />
+    <ClInclude Include="RSA.h" />
+    <ClInclude Include="StringEncoder.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
