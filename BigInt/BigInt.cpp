@@ -22,39 +22,52 @@ int16_t BigInt::GetSign() const
 	return m_sign;
 }
 
-bool BigInt::operator>(const BigInt& other)
+bool BigInt::operator>(const BigInt& other) const
 {
 	if (m_sign > other.m_sign)
 		return true;
 	if (m_sign < other.m_sign)
 		return false;
 	auto cmp = AbsCompare(*this, other);
-	if (cmp == 1)
-		return m_sign > 0;
-	if (cmp == 0)
-		return m_sign > other.m_sign;
-	if (cmp == -1)
+	if (cmp > 0)
+		return m_sign > 0;	
+	if (cmp < 0)
 		return m_sign < 0;
+	return m_sign > other.m_sign;
 }
 
-bool BigInt::operator<(const BigInt& other)
+bool BigInt::operator<(const BigInt& other) const
 {
 	if (m_sign < other.m_sign)
 		return true;
 	if (m_sign > other.m_sign)
 		return false;
-
 	auto cmp = AbsCompare(*this, other);
-	if (cmp == -1)
+	if (cmp < 0)
 		return m_sign > 0;
-	if (cmp == 0)
-		return m_sign > other.m_sign;
-	if (cmp == 1)
+	if (cmp > 0)
 		return m_sign < 0;
+	return m_sign > other.m_sign;
 }
 
 
-BigInt BigInt::operator+(const BigInt& other)
+BigInt BigInt::operator<<(const uint64_t offset)
+{
+	auto result = *this;
+	for (uint64_t i = 0; i < offset; i++)	
+		result.m_data.insert(result.m_data.begin(), 0);	
+	return result;
+}
+
+BigInt BigInt::operator>>(const uint64_t offset)
+{
+	auto result = *this;
+	for (uint64_t i = 0; i < offset; i++)
+		result.m_data.erase(result.m_data.begin());
+	return result;
+}
+
+BigInt BigInt::operator+(const BigInt& other) const
 {
 	if (m_sign == other.m_sign)
 	{
@@ -62,61 +75,61 @@ BigInt BigInt::operator+(const BigInt& other)
 		result.m_sign = m_sign;
 		return result;
 	}
-	auto absc = AbsCompare(*this, other);
-	if (other.m_sign < 0) {
-		if (absc >= 0)
-		{
-			auto result = SubPositive(*this, other);
-			result.m_sign = 1;
-			return result;
-		}
-		else
-		{
-			auto result = SubPositive(other, *this);
-			result.m_sign = -1;
-			return result;
-		}
-	}
-	if (absc >= 0)
-	{
+	auto cmp = AbsCompare(*this, other);
+	if (cmp == 0)
+		return BigInt(0);
+
+	if (cmp > 0)
+	{// this > other	
 		auto result = SubPositive(*this, other);
-		result.m_sign = -1;
+		result.m_sign = m_sign;
 		return result;
 	}
 	else
-	{
+	{// this < other
 		auto result = SubPositive(other, *this);
-		result.m_sign = 1;
+		result.m_sign = -m_sign;
 		return result;
 	}
 }
 
-BigInt BigInt::operator*(const int d)
+BigInt BigInt::operator-(const BigInt& other) const
+{
+	return *this + (-other);
+}
+
+BigInt BigInt::operator*(const BigInt& other) const
+{
+	auto result = BigInt();
+	for (BigInt i = 0; i < other; i = i + 1)	
+		result = result + *this;
+	return result;
+}
+
+BigInt BigInt::operator-() const
+{
+	auto result = *this;
+	result.m_sign *= -1;
+	return result;
+}
+
+bool BigInt::operator==(const BigInt& other) const
+{
+	return m_sign == other.m_sign && AbsCompare(*this, other) == 0;
+}
+
+
+bool BigInt::operator!=(const BigInt& other) const
+{
+	return !(*this == other);
+}
+
+BigInt BigInt::operator/(const BigInt& other) const
 {
 	return BigInt(0);
 }
 
-BigInt BigInt::operator*(const BigInt& other)
-{
-	return BigInt(0);
-}
-
-BigInt BigInt::operator-(const BigInt& other)
-{
-	return BigInt(0);
-}
-
-BigInt BigInt::operator-()
-{
-	return BigInt(0);
-}
-
-BigInt BigInt::operator/(const BigInt& other)
-{
-	return BigInt(0);
-}
-
-BigInt BigInt::operator%(const BigInt& other)
+BigInt BigInt::operator%(const BigInt& other) const
 {
 	return BigInt(0);
 }
@@ -126,24 +139,14 @@ BigInt BigInt::Mod(BigInt& m)
 	return BigInt(0);
 }
 
-bool BigInt::operator!=(const BigInt& other)
-{
-	return false;
-}
-
 BigInt BigInt::Abs(const BigInt& other)
 {
 	return BigInt(0);
 }
 
-BigInt BigInt::multInv(const BigInt& e, const BigInt& t)
+BigInt BigInt::MultInv(const BigInt& e, const BigInt& t)
 {
 	return BigInt(0);
-}
-
-void BigInt::StringToData(const std::string& str)
-{
-
 }
 
 void BigInt::EraseLeadingZeros(std::vector<uint64_t>& v)
@@ -267,16 +270,10 @@ int BigInt::AbsCompare(const BigInt& a, const BigInt& b)
 	return 0;
 }
 
-bool BigInt::operator==(const BigInt& other)
-{
-	return false;
-}
-
 std::ostream& operator<<(std::ostream& os, const BigInt& bigint)
 {
-	os << "(";
+	os << ((bigint.m_sign > 0) ? "+" : "-");	
 	for (auto i = bigint.m_data.rbegin(); i != bigint.m_data.rend(); ++i)
-		os << *i << ":";
-	os << ")";
+		os << *i << " ";	
 	return os;
 }
