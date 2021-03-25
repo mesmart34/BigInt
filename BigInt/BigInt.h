@@ -8,43 +8,40 @@
 class BigInt
 {
 public:
-	BigInt(std::vector<int> data, int sign);
-	BigInt(const std::string& data);
-	BigInt(const char* data);
+	BigInt(uint64_t value);
 
-	std::vector<int> GetData() const;
-	int GetSize() const;
-	int GetSign() const;
+	std::vector<uint64_t> GetData() const;
+	size_t GetSize() const;
+	int16_t GetSign() const;
 
 
-	BigInt operator+(const BigInt& bigint);
-	BigInt operator*(const BigInt& bigint);
+	BigInt operator+(const BigInt& other);
+	BigInt operator*(const BigInt& other);
 	BigInt operator*(const int d);
-	BigInt operator-(const BigInt& bigint);
-	BigInt operator/(const BigInt& bigint);
-	BigInt operator%(const BigInt& bigint);
-	bool operator<(const BigInt& bigint);
-	bool operator>(const BigInt& bigint);
+	BigInt operator-(const BigInt& other);
+	BigInt operator/(const BigInt& other);
+	BigInt operator%(const BigInt& other);
+	bool operator<(const BigInt& other);
+	bool operator>(const BigInt& other);
 	BigInt operator-();
-	BigInt multByTen(int power);
 	BigInt Mod(BigInt& m);
-	bool operator==(const BigInt& bigint);
-	bool operator!=(const BigInt& bigint);
-	static BigInt Abs(const BigInt& bigint);
+	bool operator==(const BigInt& other);
+	bool operator!=(const BigInt& other);
+	static BigInt Abs(const BigInt& other);
 	static BigInt multInv(const BigInt& e, const BigInt& t);
-
-	int toBin() const;
 
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);
 	static void EraseLeadingZeros(std::vector<int>& v);
+	static size_t GetMaxSize(const BigInt& a, const BigInt& b);
+	static size_t GetMinSize(const BigInt& a, const BigInt& b);
+
+	static void CarryAdd(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry);
 
 private:
 	void StringToData(const std::string& str);
-	int Div(const int a, const int b) const;
-	int Mod(const int a, const int b) const;
-	std::tuple<BigInt, BigInt> Divide(const BigInt& bigint);
+	std::tuple<BigInt, BigInt> Divide(const BigInt& other);
 
 private:
-	std::vector<int> m_data;
-	int m_sign;
+	std::vector<uint64_t> m_data;
+	int16_t m_sign;
 };
