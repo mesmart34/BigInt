@@ -42,8 +42,8 @@ BigInt BigInt::operator+(const BigInt& other)
 	for (size_t i = 0; i < sz; i++)
 	{
 		uint64_t mValue, mCarry, mCarry2;
-		auto val1 = 0;
-		auto val2 = 0;
+		uint64_t val1 = 0;
+		uint64_t val2 = 0;
 		if (i < m_data.size())
 			val1 = m_data[i];
 		if (i < other.m_data.size())
@@ -138,7 +138,7 @@ size_t BigInt::GetMinSize(const BigInt& a, const BigInt& b)
 void BigInt::CarryAdd(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 {
 	auto sum = a + b;
-	if (sum > a || sum > b)
+	if (sum >= a || sum >= b)
 	{
 		value = sum;
 		carry = 0;
@@ -147,7 +147,7 @@ void BigInt::CarryAdd(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 	{
 		auto max = std::max(a, b);
 		auto min = std::min(a, b);
-		value = min - (UINT64_MAX - max);
+		value = min - (UINT64_MAX - max) - 1;
 		carry = 1;
 	}
 }
@@ -160,10 +160,8 @@ bool BigInt::operator==(const BigInt& other)
 std::ostream& operator<<(std::ostream& os, const BigInt& bigint)
 {
 	os << "(";
-	for (auto i = bigint.m_data.begin(); i < bigint.m_data.end(); i++)
-	{
-		os << *i << ":";
-	}
+	for (auto i = bigint.m_data.rbegin(); i != bigint.m_data.rend(); ++i)	
+		os << *i << ":";	
 	os << ")";
 	return os;
 }

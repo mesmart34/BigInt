@@ -6,8 +6,10 @@
 
 int main(int argc, char** argv)
 {
-	auto a = BigInt(UINT64_MAX / 2);
-	auto b = BigInt(UINT64_MAX / 2);
+	auto half = (UINT64_MAX / 2) + 1;
+	std::cout << half << std::endl;
+ 	auto a = BigInt(half);
+	auto b = BigInt(half);
 	for (auto i = 0; i < 100; i++) {
 		std::cout << a << std::endl;
 		a = a + b;		
