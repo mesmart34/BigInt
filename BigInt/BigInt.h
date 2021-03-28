@@ -26,6 +26,11 @@ public:
 	BigInt operator-(const BigInt& other) const;
 	BigInt operator/(const BigInt& other) const;
 	BigInt operator%(const BigInt& other) const;
+	BigInt operator+=(const BigInt& other);
+	BigInt operator-=(const BigInt& other);
+	BigInt operator*=(const BigInt& other);
+	BigInt operator/=(const BigInt& other);
+	BigInt operator%=(const BigInt& other);
 	bool operator<(const BigInt& other) const;
 	bool operator<=(const BigInt& other) const;
 	bool operator>(const BigInt& other) const;
@@ -33,18 +38,20 @@ public:
 	BigInt operator-() const;
 	BigInt operator++();
 	BigInt operator--();
-	BigInt multByTen(int power);
-	bool operator==(const BigInt& biothergint) const;
+	bool operator==(const BigInt& other) const;
 	bool operator!=(const BigInt& other) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);
+	static BigInt GetInverseElementModulo(const BigInt& n1, const BigInt& n2);
 
 private:
-	void StringToData(const std::string& str);
+	static BigInt StringToData(const std::string& str) ;
+	static BigInt MultByDigit(const BigInt& other, const int power);
 	static std::vector<int> EraseLeadingZeros(const std::vector<int>& v);
 	static void FillSameSize(const BigInt& a, const BigInt& b, vector<int>& aDigits, vector<int>& bDigits);
 	static std::tuple<int, BigInt> Divide(const BigInt& a, const BigInt& b);
 	static BigInt Abs(const BigInt& b);
+	static BigInt GCD(const BigInt& n1, const BigInt& n2, BigInt& x, BigInt& y);
 
 private:
 	std::vector<int> m_digits;

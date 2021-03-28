@@ -178,5 +178,146 @@ namespace BigIntTest
 			auto expected = BigInt("0");
 			Assert::IsTrue(actual == expected);
 		}
+
+		TEST_METHOD(Mult2)
+		{
+			auto actual = BigInt("12345678") * BigInt("0");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult3)
+		{
+			auto actual = BigInt("-12345678") * BigInt("0");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult4)
+		{
+			auto actual = BigInt("12345678") * BigInt("1");
+			auto expected = BigInt("12345678");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult5)
+		{
+			auto actual = BigInt("-12345678") * BigInt("1");
+			auto expected = BigInt("-12345678");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult6)
+		{
+			auto actual = BigInt("12345678") * BigInt("12345678");
+			auto expected = BigInt("152415765279684");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult7)
+		{
+			auto actual = BigInt("-12345678") * BigInt("-12345678");
+			auto expected = BigInt("152415765279684");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mult8)
+		{
+			auto actual = BigInt("-12345678") * BigInt("12345678");
+			auto expected = BigInt("-152415765279684");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod1)
+		{
+			auto actual = BigInt("0") % BigInt("123456789");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod2)
+		{
+			auto actual = BigInt("0") % BigInt("-123456789");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod3)
+		{
+			auto actual = BigInt("123456789") % BigInt("123456789");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod4)
+		{
+			auto actual = BigInt("-123456789") % BigInt("-123456789");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod5)
+		{
+			auto actual = BigInt("-123456789") % BigInt("123456789");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod6)
+		{
+			auto actual = BigInt("123456789") % BigInt("1");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod7)
+		{
+			auto actual = BigInt("-123456789") % BigInt("1");
+			auto expected = BigInt("0");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(Mod8)
+		{
+			auto actual = BigInt("123456789") % BigInt("2");
+			auto expected = BigInt("1");
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(GetInverseElementModulo1)
+		{
+			auto n1BigInt = BigInt("123456789");
+			auto n2BigInt = BigInt("19");
+			auto actual = BigInt::GetInverseElementModulo(n1BigInt, n2BigInt);
+			auto expected = BigInt("1");
+			Assert::IsTrue(actual * n1BigInt % n2BigInt == expected);
+		}
+
+		TEST_METHOD(GetInverseElementModulo2)
+		{
+			auto n1BigInt = BigInt("123456789");
+			auto n2BigInt = BigInt("23");
+			auto actual = BigInt::GetInverseElementModulo(n1BigInt, n2BigInt);
+			auto expected = BigInt("1");
+			Assert::IsTrue(actual * n1BigInt % n2BigInt == expected);
+		}
+
+		TEST_METHOD(GetInverseElementModulo3)
+		{
+			auto n1BigInt = BigInt("1111111111111111111");
+			auto n2BigInt = BigInt("11");
+			auto actual = BigInt::GetInverseElementModulo(n1BigInt, n2BigInt);
+			auto expected = BigInt("1");
+			Assert::IsTrue(actual * n1BigInt % n2BigInt == expected);
+		}
+
+		TEST_METHOD(GetInverseElementModulo4)
+		{
+			auto n1BigInt = BigInt("1");
+			auto n2BigInt = BigInt("123456789");
+			auto actual = BigInt::GetInverseElementModulo(n1BigInt, n2BigInt);
+			auto expected = BigInt("1");
+			Assert::IsTrue(actual * n1BigInt % n2BigInt == expected);
+		}
 	};
 }

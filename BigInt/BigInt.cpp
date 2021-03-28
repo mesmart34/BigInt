@@ -7,12 +7,12 @@ BigInt::BigInt(vector<int> data = {0}, int sign = 1)
 
 BigInt::BigInt(const std::string& data)
 {
-	StringToData(data);
+	*this = StringToData(data);
 }
 
 BigInt::BigInt(const char* data)
 {
-	StringToData({ data });
+	*this = StringToData({ data });
 }
 
 BigInt::BigInt(const int number)
@@ -96,32 +96,51 @@ BigInt BigInt::operator+(const BigInt& other) const
 	return *this - -other;
 }
 
+BigInt BigInt::operator+=(const BigInt& other)
+{
+	*this = *this + other;
+	return *this;
+}
+
+BigInt BigInt::operator-=(const BigInt& other)
+{
+	*this = *this - other;
+	return *this;
+}
+
 BigInt BigInt::operator*(const int d) const
 {
 	if (d < 0 || d > 9)
 		throw "Out of range";
 	else
 	{
-		auto result = *this;
-		for (auto i = 1; i < d; i++)
+		auto result = BigInt("0");
+		for (auto i = 0; i < d; i++)
 			result = result + *this;
 		return result;
 	}
 }
 
-BigInt BigInt::operator*(const BigInt& bigint) const
+BigInt BigInt::operator*(const BigInt& other) const
 {
-	
-	auto sum = BigInt();
-	auto temp = BigInt();
-	for (auto i = 0; i < bigint.GetSize(); i++)
+
+	if (*this == BigInt("0") || other == BigInt("0"))
+		return BigInt("0");
+	auto n1Abs = *this;
+	if (this->m_sign < 0)
+		n1Abs = -*this;
+	auto mult = BigInt("0");
+	auto power = 0;
+	for (auto i = (int)other.m_digits.size() - 1; i >= 0; i--)
 	{
-		temp = *this * bigint.m_digits[i];
-		temp = temp.multByTen(bigint.GetSize() - i - 1);
-		sum = sum + temp;
+		auto temp = n1Abs * other.m_digits[i];
+		mult += MultByDigit(temp, power);
+		power++;
 	}
-	sum.m_sign = m_sign * bigint.m_sign;
-	return sum;
+
+	if (this->m_sign * other.m_sign < 0)
+		return -mult;
+	return mult;
 }
 
 BigInt BigInt::operator-(const BigInt& other) const
@@ -204,18 +223,40 @@ BigInt BigInt::operator/(const BigInt& other) const
 
 BigInt BigInt::operator%(const BigInt& other) const
 {
-	auto division = *this / other;
-	auto temp = other * (division.m_sign == 1 ? division : division - "1");
-	auto mod = *this - temp;
-	return mod;
+	if (other == BigInt("0"))
+		throw "Div by zero";
+	auto n1Abs = Abs(*this);
+	auto n2Abs = Abs(other);
+	auto remainderAbs = n1Abs - n1Abs / n2Abs * n2Abs;
+	if (this->m_sign * other.m_sign < 0 && remainderAbs != BigInt("0"))
+		return -remainderAbs;
+	return remainderAbs;
 }
 
-BigInt BigInt::multByTen(int power)
+BigInt BigInt::operator*=(const BigInt& other)
 {
-	std::vector<int> digits{m_digits};
+	*this = *this * other;
+	return *this;
+}
+
+BigInt BigInt::operator/=(const BigInt& other)
+{
+	*this = *this / other;
+	return *this;
+}
+
+BigInt BigInt::operator%=(const BigInt& other)
+{
+	*this = *this % other;
+	return *this;
+}
+
+BigInt BigInt::MultByDigit(const BigInt& other, const int power)
+{
+	std::vector<int> digits{ other.m_digits};
 	for (auto i = 0; i < power; i++)
 		digits.push_back(0);
-	return BigInt(digits, this->m_sign);
+	return BigInt(digits, other.m_sign);
 }
 
 bool BigInt::operator!=(const BigInt& other) const
@@ -224,21 +265,22 @@ bool BigInt::operator!=(const BigInt& other) const
 }
 
 
-void BigInt::StringToData(const std::string& str)
+BigInt BigInt::StringToData(const std::string& str)
 {
-	m_sign = 1;
-	m_digits = std::vector<int>();
+	auto sign = 1;
+	auto digits = std::vector<int>();
 	if (str.at(0) == '-')
 	{
-		m_sign = -1;
+		sign = -1;
 		if (str.size() == 1)
-			return;
+			throw "Wrong format!";
 	}
-	m_digits.reserve(str.size());
-	for (auto i = m_sign < 0 ? 1 : 0; i < str.size(); i++)
+	digits.reserve(str.size());
+	for (auto i = sign < 0 ? 1 : 0; i < str.size(); i++)
 	{
-		m_digits.push_back((int)str.at(i) - 48);
+		digits.push_back((int)str.at(i) - 48);
 	}
+	return BigInt(digits, sign);
 }
 
 std::vector<int> BigInt::EraseLeadingZeros(const std::vector<int>& v)
@@ -279,6 +321,36 @@ std::tuple<int, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
 BigInt BigInt::Abs(const BigInt& b)
 {
 	return BigInt(b.GetData(), 1);
+}
+
+BigInt BigInt::GCD(const BigInt& n1, const BigInt& n2, BigInt& x, BigInt& y)
+{
+	if (n1.m_sign < 0 || n2.m_sign < 0)
+		throw "Numbers must be positive";
+	if (n1 == BigInt("0"))
+	{
+		x = BigInt("0");
+		y = BigInt("1");
+		return n2;
+	}
+	auto x1 = BigInt("0");
+	auto y1 = BigInt("0");
+	auto d = GCD(n2 % n1, n1, x1, y1);
+	x = y1 - n2 / n1 * x1;
+	y = x1;
+	return d;
+}
+
+BigInt BigInt::GetInverseElementModulo(const BigInt& n1, const BigInt& n2)
+{
+	if (n1 < BigInt("1") || n2 <= BigInt("1"))
+		throw "n1 must be >=1, n2 must be >1";
+	auto x = BigInt("0");
+	auto y = BigInt("0");
+	auto gcd = GCD(n1, n2, x, y);
+	if (Abs(gcd) != BigInt("1"))
+		throw "Numbers must be simple";
+	return (x % n2 + n2) % n2;
 }
 
 bool BigInt::operator==(const BigInt& other) const
