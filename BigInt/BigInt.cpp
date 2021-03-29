@@ -2,7 +2,7 @@
 
 using namespace std;
 
-BigInt::BigInt(vector<int> data = {0}, int sign = 1)
+BigInt::BigInt(vector<uint8_t> data, int8_t sign)
 	: m_digits(data), m_sign(sign) { }
 
 BigInt::BigInt(const std::string& data)
@@ -17,21 +17,23 @@ BigInt::BigInt(const char* data)
 
 BigInt::BigInt(const int number)
 {
+	*this = StringToData(to_string(number));
+} 
 
-}
-
-vector<int> BigInt::GetData() const
+vector<uint8_t> BigInt::GetData() const
 {
 	return m_digits;
 }
 
-int BigInt::GetSize() const
+uint8_t BigInt::GetSize() const
 {
 	return m_digits.size();
 }
 
-int BigInt::GetSign() const
+int8_t BigInt::GetSign() const
 {
+	if (m_digits == vector<uint8_t>(0))
+		return 1;
 	return m_sign;
 }
 
@@ -39,10 +41,10 @@ bool BigInt::operator>(const BigInt& other) const
 {
 	if (this->m_sign == other.m_sign)
 	{
-		auto d1 = vector<int>();
-		auto d2 = vector<int>();
+		auto d1 = vector<uint8_t>();
+		auto d2 = vector<uint8_t>();
 		FillSameSize(*this, other, d1, d2);
-		for (auto i = 0; i < d2.size(); i++)
+		for (auto i = 0; i < d1.size(); i++)
 		{
 			if (d1[i] * this->m_sign > d2[i] * other.m_sign)
 				return true;
@@ -76,17 +78,17 @@ BigInt BigInt::operator+(const BigInt& other) const
 	if (this->m_sign * other.m_sign > 0)
 	{
 		auto carry = 0;
-		auto result = vector<int>();
-		auto d1 = vector<int>();
-		auto d2 = vector<int>();
+		auto result = vector<uint8_t>();
+		auto d1 = vector<uint8_t>();
+		auto d2 = vector<uint8_t>();
 		FillSameSize(*this, other, d1, d2);
 		for (auto i = (int)d1.size() - 1; i >= 0; i--)
 		{
 			auto sum = (d1[i] + d2[i] + carry) % 10;
 			carry = (d1[i] + d2[i] + carry) / 10;
-			result.insert(result.begin(), (int)labs(sum));
+			result.insert(result.begin(), (uint8_t)labs(sum));
 		}
-		result.insert(result.begin(), (int)carry);
+		result.insert(result.begin(), (uint8_t)carry);
 		auto sign = this->m_sign;
 		result = EraseLeadingZeros(result);
 		return BigInt(result, sign);
@@ -108,7 +110,7 @@ BigInt BigInt::operator-=(const BigInt& other)
 	return *this;
 }
 
-BigInt BigInt::operator*(const int d) const
+BigInt BigInt::operator*(const uint8_t d) const
 {
 	if (d < 0 || d > 9)
 		throw "Out of range";
@@ -134,7 +136,7 @@ BigInt BigInt::operator*(const BigInt& other) const
 	for (auto i = (int)other.m_digits.size() - 1; i >= 0; i--)
 	{
 		auto temp = n1Abs * other.m_digits[i];
-		mult += MultByDigit(temp, power);
+		mult += MultByTen(temp, power);
 		power++;
 	}
 
@@ -148,9 +150,9 @@ BigInt BigInt::operator-(const BigInt& other) const
 	if (this->m_sign * other.m_sign > 0)
 	{
 		auto carry = 0;
-		auto result = vector<int>();
-		auto d1 = vector<int>();
-		auto d2 = vector<int>();
+		auto result = vector<uint8_t>();
+		auto d1 = vector<uint8_t>();
+		auto d2 = vector<uint8_t>();
 		FillSameSize(*this, other, d1, d2);
 		auto max = d1;
 		auto min = d2;
@@ -163,7 +165,7 @@ BigInt BigInt::operator-(const BigInt& other) const
 		{
 			auto sum = (10 + max[i] - min[i] - carry) % 10;
 			carry = max[i] - carry < min[i] ? 1 : 0;
-			result.insert(result.begin(), (int)labs(sum));
+			result.insert(result.begin(), (uint8_t)labs(sum));
 		}
 		auto sign = *this >= other ? 1 : -1;
 		result = EraseLeadingZeros(result);
@@ -179,13 +181,13 @@ BigInt BigInt::operator-() const
 
 BigInt BigInt::operator++()
 {
-	*this = *this + BigInt(1);
+	*this = *this + BigInt("1");
 	return *this;
 }
 
 BigInt BigInt::operator--()
 {
-	*this = *this - BigInt(1);
+	*this = *this - BigInt("1");
 	return *this;
 }
 
@@ -205,8 +207,8 @@ BigInt BigInt::operator/(const BigInt& other) const
 		return BigInt("-1");
 	auto n1Abs = Abs(*this);
 	auto n2Abs = Abs(other);
-	auto remainder = vector<int>();
-	auto result = vector<int>();
+	auto remainder = vector<uint8_t>();
+	auto result = vector<uint8_t>();
 	for(auto digit : n1Abs.m_digits)
 	{
 		remainder.push_back(digit);
@@ -251,9 +253,9 @@ BigInt BigInt::operator%=(const BigInt& other)
 	return *this;
 }
 
-BigInt BigInt::MultByDigit(const BigInt& other, const int power)
+BigInt BigInt::MultByTen(const BigInt& other, const uint8_t power)
 {
-	std::vector<int> digits{ other.m_digits};
+	std::vector<uint8_t> digits{ other.m_digits};
 	for (auto i = 0; i < power; i++)
 		digits.push_back(0);
 	return BigInt(digits, other.m_sign);
@@ -268,7 +270,7 @@ bool BigInt::operator!=(const BigInt& other) const
 BigInt BigInt::StringToData(const std::string& str)
 {
 	auto sign = 1;
-	auto digits = std::vector<int>();
+	auto digits = std::vector<uint8_t>();
 	if (str.at(0) == '-')
 	{
 		sign = -1;
@@ -278,12 +280,12 @@ BigInt BigInt::StringToData(const std::string& str)
 	digits.reserve(str.size());
 	for (auto i = sign < 0 ? 1 : 0; i < str.size(); i++)
 	{
-		digits.push_back((int)str.at(i) - 48);
+		digits.push_back((uint8_t)str.at(i) - 48);
 	}
 	return BigInt(digits, sign);
 }
 
-std::vector<int> BigInt::EraseLeadingZeros(const std::vector<int>& v)
+std::vector<uint8_t> BigInt::EraseLeadingZeros(const std::vector<uint8_t>& v)
 {
 	auto result = v;
 	while (result[0] == 0 && result.size() > 1)
@@ -291,11 +293,11 @@ std::vector<int> BigInt::EraseLeadingZeros(const std::vector<int>& v)
 	return result;
 }
 
-void BigInt::FillSameSize(const BigInt& a, const BigInt& b, vector<int>& aDigits, vector<int>& bDigits)
+void BigInt::FillSameSize(const BigInt& a, const BigInt& b, vector<uint8_t>& aDigits, vector<uint8_t>& bDigits)
 {
 	auto delta = std::labs(a.GetSize() - b.GetSize());
-	aDigits = a.m_digits;
-	bDigits = b.m_digits;
+	aDigits = vector<uint8_t>(a.m_digits);
+	bDigits = vector<uint8_t>(b.m_digits);
 	for (auto i = 0; i < delta; i++)
 	{
 		if (a.GetSize() > b.GetSize())
@@ -305,7 +307,7 @@ void BigInt::FillSameSize(const BigInt& a, const BigInt& b, vector<int>& aDigits
 	}
 }
 
-std::tuple<int, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
+std::tuple<uint64_t, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
 {
 	auto result = 0;
 	auto remainder = BigInt(a.m_digits, 1);
@@ -315,7 +317,29 @@ std::tuple<int, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
 		result++;
 	}
 
-	return tuple<int, BigInt>(result, remainder);
+	return tuple<uint64_t, BigInt>(result, remainder);
+}
+
+BigInt BigInt::ModPow(const BigInt& n1, const BigInt& power, const BigInt& mod)
+{
+	if (power == BigInt("0")) 
+		return BigInt("1");
+	if (power % BigInt("2") == BigInt("1"))
+		return n1 * ModPow(n1, power - BigInt("1"), mod) % mod;
+	auto n2 = ModPow(n1, power / BigInt("2"), mod);
+	return n2 * n2 % mod;
+}
+
+uint8_t BigInt::ParseToInt(const BigInt& other)
+{
+	auto result = 0;
+	auto index = other.m_digits.size() - 1;
+	for (auto i = other.m_digits.begin(); i < other.m_digits.end(); i++)
+	{
+		result += pow(10, index) * *i;
+		index -= 1;
+	}
+	return result;
 }
 
 BigInt BigInt::Abs(const BigInt& b)
@@ -341,6 +365,30 @@ BigInt BigInt::GCD(const BigInt& n1, const BigInt& n2, BigInt& x, BigInt& y)
 	return d;
 }
 
+bool BigInt::IsPrime(const BigInt& other)
+{
+	auto i = BigInt("2");
+	while (i * i <= other)
+	{
+		if (other % i == BigInt("0"))
+			return false;
+		i = i + 1;
+	}
+
+	return true;
+}
+
+std::string BigInt::ToString() const
+{
+	auto line = string();
+	auto ss = std::stringstream();
+	if (m_sign < 0)
+		line += "-";
+	for (auto digit : m_digits)
+		line += to_string(digit);
+	return line;
+}
+
 BigInt BigInt::GetInverseElementModulo(const BigInt& n1, const BigInt& n2)
 {
 	if (n1 < BigInt("1") || n2 <= BigInt("1"))
@@ -355,8 +403,6 @@ BigInt BigInt::GetInverseElementModulo(const BigInt& n1, const BigInt& n2)
 
 bool BigInt::operator==(const BigInt& other) const
 {
-	if (other.m_digits == vector<int>{0}&& other.m_digits == this->m_digits)
-		return true;
 	return other.m_sign == this->m_sign && other.m_digits == this->m_digits;
 }
 
@@ -365,7 +411,7 @@ std::ostream& operator<<(std::ostream& os, const BigInt& bigint)
 	os << ((bigint.GetSign() == 1) ? '+' : '-');
 	for (auto i = 0; i < bigint.GetSize(); i++)
 	{
-		os << std::to_string(bigint.GetData()[i]);
+		os << to_string(bigint.GetData()[i]);
 	}
 	return os;
 }

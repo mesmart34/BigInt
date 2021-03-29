@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "../BigInt/BigInt.h"
+#include "../BigInt/RSA.h"
 
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -318,6 +319,185 @@ namespace BigIntTest
 			auto actual = BigInt::GetInverseElementModulo(n1BigInt, n2BigInt);
 			auto expected = BigInt("1");
 			Assert::IsTrue(actual * n1BigInt % n2BigInt == expected);
+		}
+
+		TEST_METHOD(RSATest1)
+		{
+			auto rsa = RSA("31", "37");
+			auto openKeys = rsa.GetOpenKeys();
+
+			auto msg = "hello, world";
+
+			auto encoded = rsa.Encode(msg, get<0>(openKeys), get<1>(openKeys));
+			auto closeKeys = rsa.GetCloseKeys();
+			auto initialMsg = rsa.Decode(encoded, get<0>(closeKeys), get<1>(closeKeys));
+
+			Assert::IsTrue(msg == initialMsg);
+		}
+
+		TEST_METHOD(RSATest2)
+		{
+			auto rsa = RSA("11", "13");
+			auto openKeys = rsa.GetOpenKeys();
+
+			auto msg = "hi";
+
+			auto encoded = rsa.Encode(msg, get<0>(openKeys), get<1>(openKeys));
+			auto closeKeys = rsa.GetCloseKeys();
+			auto initialMsg = rsa.Decode(encoded, get<0>(closeKeys), get<1>(closeKeys));
+
+			Assert::IsTrue(msg == initialMsg);
+		}
+
+		TEST_METHOD(RSATest3)
+		{
+			auto rsa = RSA("19", "23");
+			auto openKeys = rsa.GetOpenKeys();
+
+			auto msg = "hello, world";
+
+			auto encoded = rsa.Encode(msg, get<0>(openKeys), get<1>(openKeys));
+			auto closeKeys = rsa.GetCloseKeys();
+			auto initialMsg = rsa.Decode(encoded, get<0>(closeKeys), get<1>(closeKeys));
+
+			Assert::IsTrue(msg == initialMsg);
+		}
+
+		TEST_METHOD(RSATest4)
+		{
+			auto rsa = RSA("83", "89");
+			auto openKeys = rsa.GetOpenKeys();
+
+			auto msg = "hello, world";
+
+			auto encoded = rsa.Encode(msg, get<0>(openKeys), get<1>(openKeys));
+			auto closeKeys = rsa.GetCloseKeys();
+			auto initialMsg = rsa.Decode(encoded, get<0>(closeKeys), get<1>(closeKeys));
+
+			Assert::IsTrue(msg == initialMsg);
+		}
+
+		TEST_METHOD(OperatorEqual1)
+		{
+			auto actual = BigInt("0") == BigInt("0");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(OperatorEqual2)
+		{
+			auto actual = BigInt("12345678990") == BigInt("0");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual3)
+		{
+			auto actual = BigInt("-12345678990") == BigInt("0");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual4)
+		{
+			auto actual = BigInt("1234567891234") == BigInt("2234567891234");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual5)
+		{
+			auto actual = BigInt("-1234567891234") == BigInt("-2234567891234");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual6)
+		{
+			auto actual = BigInt("-1234567891234") == BigInt("2234567891234");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual7)
+		{
+			auto actual = BigInt("-1234567891234") == BigInt("-1234567891234");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqual8)
+		{
+			auto actual = BigInt("1234567891234") == BigInt("1234567891234");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorEqua9)
+		{
+			auto actual = BigInt("1234567891234") == BigInt("-1234567891234");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+
+		TEST_METHOD(OperatorMore1)
+		{
+			auto actual = BigInt("123456789") > BigInt("123456789");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore2)
+		{
+			auto actual = BigInt("-123456789") > BigInt("-123456789");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore3)
+		{
+			auto actual = BigInt("-123456789") > BigInt("123456789");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore4)
+		{
+			auto actual = BigInt("-123456789") > BigInt("-123456790");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore5)
+		{
+			auto actual = BigInt("-123456789") > BigInt("-123456788");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore6)
+		{
+			auto actual = BigInt("123456789") > BigInt("123456788");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore7)
+		{
+			auto actual = BigInt("123456788") > BigInt("123456789");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore8)
+		{
+			auto actual = BigInt("123456789") > BigInt("-1234");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore9)
+		{
+			auto actual = BigInt("-123456789") > BigInt("1234");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore10)
+		{
+			auto actual = BigInt("0") > BigInt("-123456789");
+			auto expected = true;
+			Assert::IsTrue(actual == expected);
+		}
+		TEST_METHOD(OperatorMore11)
+		{
+			auto actual = BigInt("0") > BigInt("123456789");
+			auto expected = false;
+			Assert::IsTrue(actual == expected);
 		}
 	};
 }
