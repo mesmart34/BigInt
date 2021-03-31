@@ -7,6 +7,13 @@ BigInt::BigInt(uint64_t value)
 	m_data.push_back(value);
 }
 
+BigInt::BigInt(const std::string& value)
+{
+	m_sign = 1;
+	m_data = std::vector<uint64_t>();
+	m_data.push_back(atoi(value.c_str()));
+}
+
 std::vector<uint64_t> BigInt::GetData() const
 {
 	return m_data;
@@ -254,7 +261,7 @@ void BigInt::CarrySub(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 
 std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
 {
-	if (a.GetSize() < b.GetSize())
+	if (a < b)
 		return std::tuple<BigInt, BigInt>(0, a);
 	if (b == 0)
 		throw "Division by zero!";
@@ -349,15 +356,21 @@ BigInt BigInt::SubPositive(const BigInt& a, const BigInt& b)
 
 bool BigInt::IsPrime(const BigInt& n)
 {
-	auto i = BigInt(2);
-	while (i * i <= n)
-	{
-		if (n % i == BigInt(0))
+	if (n <= 1)
+		return false;
+	if (n <= 3)
+		return true;
+	if (n % 2 == 0 || n % 3 == 0)
+		return false;
+	for (BigInt i = 5; i * i <= n; i = i + 6)
+	{	
+		auto check = n % (i + 2);
+		if (n % i == 0 || check == 0)
 			return false;
-		i = i + 1;
 	}
 	return true;
 }
+
 
 BigInt BigInt::Mul64Positive(const BigInt& a, const uint64_t b)
 {
@@ -369,15 +382,19 @@ BigInt BigInt::Mul64Positive(const BigInt& a, const uint64_t b)
 
 int BigInt::AbsCompare(const BigInt& a, const BigInt& b)
 {
-	if (a.m_data.size() > b.m_data.size())
+	BigInt ta = a;
+	BigInt tb = b;
+	EraseLeadingZeros(ta.m_data);
+	EraseLeadingZeros(tb.m_data);
+	if (ta.m_data.size() > tb.m_data.size())
 		return 1;
-	if (a.m_data.size() < b.m_data.size())
+	if (ta.m_data.size() < tb.m_data.size())
 		return -1;
 
-	auto ai = a.m_data.rbegin();
-	auto bi = b.m_data.rbegin();
+	auto ai = ta.m_data.rbegin();
+	auto bi = tb.m_data.rbegin();
 
-	while (ai != a.m_data.rend())
+	while (ai != ta.m_data.rend())
 	{
 		if (*ai > *bi)
 			return 1;

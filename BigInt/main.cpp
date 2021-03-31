@@ -6,10 +6,10 @@
 
 int main(int argc, char** argv)
 {
-	RSA encoder = RSA(11, 13);
+	RSA encoder = RSA(13, 11);
 	auto keys = encoder.GetKeys();
 	std::cout << "GotKeys" << std::endl;
-	std::string data = "egorpidor";
+	std::string data = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	auto start = std::chrono::high_resolution_clock::now();
 	auto encoded = RSA::Encode(data, std::get<0>(keys), std::get<2>(keys));
 	auto result = RSA::Decode(encoded, std::get<1>(keys), std::get<2>(keys));

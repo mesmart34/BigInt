@@ -12,14 +12,15 @@ RSA::RSA(const BigInt& a, const BigInt& b)
 
 BigInt RSA::CalculateE(const BigInt& t)
 {
-	auto e = t - 1;
-	while (!(BigInt::GCD(e,t) == 1 && BigInt::IsPrime(e)))	
-		e = e - 2;
+	auto e = t - 1;	
+	while (!(BigInt::GCD(e, t) == 1 && BigInt::IsPrime(e)))
+		e = e - 2;	
 	return e;
 }
 
 tuple<BigInt, BigInt, BigInt> RSA::GetKeys() const
 {
+	std::cout << e << "   " << d << "   " << n << std::endl;
 	return tuple<BigInt, BigInt, BigInt>(e, d, n);
 }
 
@@ -44,7 +45,7 @@ std::string RSA::Decode(const vector<BigInt> msg, const BigInt& d, const BigInt&
 	for (auto b : msg)
 	{
 		auto temp = BigInt::ModPow(b, d, n);
-		uint64_t data = temp.GetData()[0];		
+		uint64_t data = temp.GetData()[0];
 		text << (char)data;
 	}
 	return text.str();

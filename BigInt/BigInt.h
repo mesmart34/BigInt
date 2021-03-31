@@ -9,6 +9,7 @@ class BigInt
 {
 public:
 	BigInt(uint64_t value = 0);
+	BigInt(const std::string& value);
 
 	std::vector<uint64_t> GetData() const;
 	size_t GetSize() const;
