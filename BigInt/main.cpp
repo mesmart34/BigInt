@@ -3,23 +3,19 @@
 
 #include "BigInt.h"
 #include "RSA.h"
-#include "StringEncoder.h"
 
 int main(int argc, char** argv)
 {
-	
-	auto arr = std::vector<BigInt>();
-	auto half = (UINT64_MAX / 2) + 1;
-	auto a = BigInt(1);
-	auto b = BigInt(half);
+	RSA encoder = RSA(11, 13);
+	auto keys = encoder.GetKeys();
+	std::cout << "GotKeys" << std::endl;
+	std::string data = "egorpidor";
 	auto start = std::chrono::high_resolution_clock::now();
-	
-	std::cout << a << std::endl;
-	a = a << 100;
-	std::cout << a << std::endl;
-
+	auto encoded = RSA::Encode(data, std::get<0>(keys), std::get<2>(keys));
+	auto result = RSA::Decode(encoded, std::get<1>(keys), std::get<2>(keys));
 	auto end = std::chrono::high_resolution_clock::now();	
 	auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	std::cout << time << std::endl;
+	std::cout << result << std::endl;
 	system("pause");
 }

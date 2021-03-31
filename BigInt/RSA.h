@@ -1,20 +1,23 @@
 #pragma once
 
-#include "BigInt.h"
+#include <string>
+#include <vector>
 #include <tuple>
+#include <sstream>
+#include "BigInt.h"
+
+using namespace std;
 
 class RSA
 {
 public:
-	RSA() = default;
+	RSA(const BigInt& p, const BigInt& q);
 
-	std::tuple<BigInt, BigInt, BigInt> GenerateKeys(const BigInt& a, const BigInt& b);
-	BigInt Encrypt(const BigInt& msg, std::tuple<BigInt, BigInt> openedKey) const;
-	BigInt Decrypt(const BigInt& msg, std::tuple<BigInt, BigInt> closedKey) const;
+	static vector<BigInt> Encode(const string& msg, const BigInt& e, const BigInt& n);
+	static string Decode(const vector<BigInt> msg, const BigInt& d, const BigInt& n);
+	static BigInt CalculateE(const BigInt& t);
+	tuple<BigInt, BigInt, BigInt> GetKeys() const;
 
 private:
-	BigInt CalculateE(const BigInt& t) const;
-	BigInt GCD(const BigInt& a, const BigInt& b) const;
-
+	BigInt e, d, n;
 };
-

@@ -30,10 +30,20 @@ bool BigInt::operator>(const BigInt& other) const
 		return false;
 	auto cmp = AbsCompare(*this, other);
 	if (cmp > 0)
-		return m_sign > 0;	
+		return m_sign > 0;
 	if (cmp < 0)
 		return m_sign < 0;
 	return m_sign > other.m_sign;
+}
+
+bool BigInt::operator<=(const BigInt& other) const
+{
+	return *this < other || *this == other;
+}
+
+bool BigInt::operator>=(const BigInt& other) const
+{
+	return *this > other || *this == other;
 }
 
 bool BigInt::operator<(const BigInt& other) const
@@ -48,23 +58,6 @@ bool BigInt::operator<(const BigInt& other) const
 	if (cmp > 0)
 		return m_sign < 0;
 	return m_sign > other.m_sign;
-}
-
-
-BigInt BigInt::operator<<(const uint64_t offset)
-{
-	auto result = *this;
-	for (uint64_t i = 0; i < offset; i++)	
-		result.m_data.insert(result.m_data.begin(), 0);	
-	return result;
-}
-
-BigInt BigInt::operator>>(const uint64_t offset)
-{
-	auto result = *this;
-	for (uint64_t i = 0; i < offset; i++)
-		result.m_data.erase(result.m_data.begin());
-	return result;
 }
 
 BigInt BigInt::operator+(const BigInt& other) const
@@ -100,11 +93,38 @@ BigInt BigInt::operator-(const BigInt& other) const
 
 BigInt BigInt::operator*(const BigInt& other) const
 {
-	auto result = BigInt();
-	for (BigInt i = 0; i < other; i = i + 1)	
-		result = result + *this;
+	if (*this == 0 || other == 0)
+		return 0;
+	auto absA = Abs(*this);
+	auto result = BigInt(0);
+	auto power = 0;
+	for (auto i = 0; i < other.GetSize(); i++)
+	{
+		auto temp = Mul64Positive(absA, other.m_data[i]);
+		temp << power;
+		result = result + temp;
+		power++;
+	}
+	result.m_sign = m_sign * other.m_sign;
 	return result;
 }
+
+BigInt BigInt::operator<<(const uint64_t offset)
+{
+	auto result = *this;
+	for (uint64_t i = 0; i < offset; i++)
+		result.m_data.insert(result.m_data.begin(), 0);
+	return result;
+}
+
+BigInt BigInt::operator>>(const uint64_t offset)
+{
+	auto result = *this;
+	for (uint64_t i = 0; i < offset; i++)
+		result.m_data.erase(result.m_data.begin());
+	return result;
+}
+
 
 BigInt BigInt::operator-() const
 {
@@ -126,33 +146,69 @@ bool BigInt::operator!=(const BigInt& other) const
 
 BigInt BigInt::operator/(const BigInt& other) const
 {
-	return BigInt(0);
+	return std::get<0>(Divide(*this, other));
 }
 
 BigInt BigInt::operator%(const BigInt& other) const
 {
-	return BigInt(0);
+	return std::get<1>(Divide(*this, other));
 }
 
 BigInt BigInt::Mod(BigInt& m)
 {
-	return BigInt(0);
+	return *this - m * (*this / m);
 }
 
-BigInt BigInt::Abs(const BigInt& other)
+BigInt BigInt::Abs(const BigInt& a)
 {
-	return BigInt(0);
+	auto result = a;
+	result.m_sign = 1;
+	return result;
 }
 
-BigInt BigInt::MultInv(const BigInt& e, const BigInt& t)
+BigInt BigInt::MultInv(const BigInt& a, const BigInt& m)
 {
-	return BigInt(0);
+	BigInt ta = a;
+	BigInt tm = m;
+	BigInt m0 = tm;
+	BigInt y = 0, x = 1;
+	if (tm == 1)
+		return 0;
+	while (ta > 1) {
+		BigInt q = ta / tm;
+		BigInt t = tm;
+		tm = ta % tm, ta = t;
+		t = y;
+		y = x - q * y;
+		x = t;
+	}
+	if (x < 0)
+		x = x + m0;
+	return x;
 }
 
 void BigInt::EraseLeadingZeros(std::vector<uint64_t>& v)
 {
-	while (*(v.end() - 1) == 0)
+	while (v.size() > 0 && *(v.end() - 1) == 0)
 		v.pop_back();
+}
+
+BigInt BigInt::ModPow(const BigInt& n, const BigInt& power, const BigInt& mod)
+{
+	BigInt x = n;
+	BigInt y = power;
+	BigInt p = mod;
+	BigInt res = 1;
+	x = x % p;
+	if (x == 0) return 0;
+	while (y > 0)
+	{
+		if (y.GetData()[0] % 2 > 0)
+			res = (res * x) % p;
+		y = y / 2;
+		x = (x * x) % p;
+	}
+	return res;
 }
 
 size_t BigInt::GetMaxSize(const BigInt& a, const BigInt& b)
@@ -184,7 +240,6 @@ void BigInt::CarryAdd(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 
 void BigInt::CarrySub(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 {
-
 	if (a >= b)
 	{
 		value = a - b;
@@ -195,6 +250,50 @@ void BigInt::CarrySub(uint64_t a, uint64_t b, uint64_t& value, uint64_t& carry)
 		value = (UINT64_MAX - b) + a + 1;
 		carry = 1;
 	}
+}
+
+std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
+{
+	if (a.GetSize() < b.GetSize())
+		return std::tuple<BigInt, BigInt>(0, a);
+	if (b == 0)
+		throw "Division by zero!";
+
+	auto reminder = a;
+	auto subtrahend = Abs(b);
+
+	auto result = BigInt(0);
+	reminder.m_sign = 1;
+
+	while (reminder > 0)
+	{
+		reminder = reminder - subtrahend;
+		result = result + 1;
+	}
+	if (reminder < 0)
+	{
+		result = result - 1;
+		reminder = subtrahend + reminder;
+	}
+	reminder.m_sign = a.m_sign;
+	result.m_sign = a.m_sign * b.m_sign;
+	EraseLeadingZeros(result.m_data);
+	EraseLeadingZeros(reminder.m_data);
+	return std::tuple<BigInt, BigInt>(result, reminder);
+}
+
+BigInt BigInt::GCD(const BigInt& a, const BigInt& b)
+{
+	auto e = a;
+	auto t = b;
+	while (e > 0)
+	{
+
+		auto myTemp = e;
+		e = t % e;
+		t = myTemp;
+	}
+	return t;
 }
 
 BigInt BigInt::SumPositive(const BigInt& a, const BigInt& b)
@@ -248,6 +347,26 @@ BigInt BigInt::SubPositive(const BigInt& a, const BigInt& b)
 	return result;
 }
 
+bool BigInt::IsPrime(const BigInt& n)
+{
+	auto i = BigInt(2);
+	while (i * i <= n)
+	{
+		if (n % i == BigInt(0))
+			return false;
+		i = i + 1;
+	}
+	return true;
+}
+
+BigInt BigInt::Mul64Positive(const BigInt& a, const uint64_t b)
+{
+	auto result = BigInt(0);
+	for (uint64_t i = 0; i < b; i++)
+		result = result + a;
+	return result;
+}
+
 int BigInt::AbsCompare(const BigInt& a, const BigInt& b)
 {
 	if (a.m_data.size() > b.m_data.size())
@@ -272,8 +391,8 @@ int BigInt::AbsCompare(const BigInt& a, const BigInt& b)
 
 std::ostream& operator<<(std::ostream& os, const BigInt& bigint)
 {
-	os << ((bigint.m_sign > 0) ? "+" : "-");	
+	os << ((bigint.m_sign > 0) ? "+" : "-");
 	for (auto i = bigint.m_data.rbegin(); i != bigint.m_data.rend(); ++i)
-		os << *i << " ";	
+		os << *i << " ";
 	return os;
 }
