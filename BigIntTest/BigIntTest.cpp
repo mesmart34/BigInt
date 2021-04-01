@@ -377,6 +377,20 @@ namespace BigIntTest
 			Assert::IsTrue(msg == initialMsg);
 		}
 
+		TEST_METHOD(RSATest5)
+		{
+			auto rsa = RSA("73", "79");
+			auto openKeys = rsa.GetOpenKeys();
+
+			auto msg = "hello, world";
+
+			auto encoded = rsa.Encode(msg, get<0>(openKeys), get<1>(openKeys));
+			auto closeKeys = rsa.GetCloseKeys();
+			auto initialMsg = rsa.Decode(encoded, get<0>(closeKeys), get<1>(closeKeys));
+
+			Assert::IsTrue(msg == initialMsg);
+		}
+
 		TEST_METHOD(OperatorEqual1)
 		{
 			auto actual = BigInt("0") == BigInt("0");

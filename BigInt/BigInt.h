@@ -46,7 +46,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const BigInt& bigint);
 	static BigInt GetInverseElementModulo(const BigInt& n1, const BigInt& n2);
 	static bool IsPrime(const BigInt& other);
-	static BigInt GCD(const BigInt& n1, const BigInt& n2, BigInt& x, BigInt& y);
+	static BigInt GCD(const BigInt& n1, const BigInt& n2);
 	static BigInt Abs(const BigInt& b);
 	static BigInt ModPow(const BigInt& n1, const BigInt& power, const BigInt& mod);
 
@@ -56,7 +56,7 @@ private:
 	static BigInt MultByTen(const BigInt& other, const uint8_t power);
 	static std::vector<uint8_t> EraseLeadingZeros(const std::vector<uint8_t>& v);
 	static void FillSameSize(const BigInt& a, const BigInt& b, vector<uint8_t>& aDigits, vector<uint8_t>& bDigits);
-	static std::tuple<uint64_t, BigInt> Divide(const BigInt& a, const BigInt& b);
+	static std::tuple<BigInt, BigInt> Divide(const BigInt& a, const BigInt& b);
 
 private:
 	std::vector<uint8_t> m_digits;

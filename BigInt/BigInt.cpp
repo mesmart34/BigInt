@@ -193,34 +193,7 @@ BigInt BigInt::operator--()
 
 BigInt BigInt::operator/(const BigInt& other) const
 {
-	if (other ==BigInt("0"))
-		throw "Division by zero";
-	if (*this ==BigInt("0"))
-		return *this;
-	if (other == BigInt("1"))
-		return *this;
-	if (other == BigInt("-1"))
-		return -*this;
-	if (*this == other)
-		return BigInt("1");
-	if (*this == -other)
-		return BigInt("-1");
-	auto n1Abs = Abs(*this);
-	auto n2Abs = Abs(other);
-	auto remainder = vector<uint8_t>();
-	auto result = vector<uint8_t>();
-	for(auto digit : n1Abs.m_digits)
-	{
-		remainder.push_back(digit);
-		auto smallDivResult = Divide(BigInt(remainder, 1), n2Abs);
-		result.push_back(std::get<0>(smallDivResult));
-		remainder = std::get<1>(smallDivResult).m_digits;
-	}
-
-	result = EraseLeadingZeros(result);
-	if (other.m_sign * this->m_sign < 0)
-		return BigInt(result, -1);
-	return BigInt(result, 1);
+	return std::get<0>(Divide(*this, other));
 }
 
 BigInt BigInt::operator%(const BigInt& other) const
@@ -233,6 +206,7 @@ BigInt BigInt::operator%(const BigInt& other) const
 	if (this->m_sign * other.m_sign < 0 && remainderAbs != BigInt("0"))
 		return -remainderAbs;
 	return remainderAbs;
+	//return std::get<1>(Divide(*this, other));
 }
 
 BigInt BigInt::operator*=(const BigInt& other)
@@ -307,27 +281,62 @@ void BigInt::FillSameSize(const BigInt& a, const BigInt& b, vector<uint8_t>& aDi
 	}
 }
 
-std::tuple<uint64_t, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
+std::tuple<BigInt, BigInt> BigInt::Divide(const BigInt& a, const BigInt& b)
 {
-	auto result = 0;
-	auto remainder = BigInt(a.m_digits, 1);
-	while (remainder >= b)
-	{
-		remainder = remainder - b;
-		result++;
-	}
+	if (a < b)
+		return std::tuple<BigInt, BigInt>(0, a);
+	if (b == 0)
+		throw "Division by zero!";
 
-	return tuple<uint64_t, BigInt>(result, remainder);
+	auto reminder = a;
+	auto subtrahend = Abs(b);
+
+	auto result = BigInt(0);
+	reminder.m_sign = 1;
+
+	while (reminder > 0)
+	{
+		reminder = reminder - subtrahend;
+		result = result + 1;
+	}
+	if (reminder < 0)
+	{
+		result = result - 1;
+		reminder = subtrahend + reminder;
+	}
+	reminder.m_sign = a.m_sign;
+	result.m_sign = a.m_sign * b.m_sign;
+	EraseLeadingZeros(result.m_digits);
+	EraseLeadingZeros(reminder.m_digits);
+	return std::tuple<BigInt, BigInt>(result, reminder);
 }
 
 BigInt BigInt::ModPow(const BigInt& n1, const BigInt& power, const BigInt& mod)
 {
-	if (power == BigInt("0")) 
+	if (power == BigInt("0"))
 		return BigInt("1");
 	if (power % BigInt("2") == BigInt("1"))
 		return n1 * ModPow(n1, power - BigInt("1"), mod) % mod;
 	auto n2 = ModPow(n1, power / BigInt("2"), mod);
 	return n2 * n2 % mod;
+	/*auto x = n1;
+	auto y = power;
+	auto p = mod;
+	auto res = BigInt("1");
+	x = x % p;
+	if (x == 0) return 0;
+	while (y > 0)
+	{
+		cout << res.ToString() << endl;
+		if (y.m_digits[y.GetSize() - 1] % 2 > 0)
+		{
+			res = (res * x) % p;
+		}
+		y = y / 2;
+		x = (x * x) % p;
+	}
+	cout << "------------" << endl;
+	return res;*/
 }
 
 uint8_t BigInt::ParseToInt(const BigInt& other)
@@ -347,22 +356,18 @@ BigInt BigInt::Abs(const BigInt& b)
 	return BigInt(b.GetData(), 1);
 }
 
-BigInt BigInt::GCD(const BigInt& n1, const BigInt& n2, BigInt& x, BigInt& y)
+BigInt BigInt::GCD(const BigInt& n1, const BigInt& n2)
 {
-	if (n1.m_sign < 0 || n2.m_sign < 0)
-		throw "Numbers must be positive";
-	if (n1 == BigInt("0"))
+	auto e = n1;
+	auto t = n2;
+	while (e > 0)
 	{
-		x = BigInt("0");
-		y = BigInt("1");
-		return n2;
+
+		auto myTemp = e;
+		e = t % e;
+		t = myTemp;
 	}
-	auto x1 = BigInt("0");
-	auto y1 = BigInt("0");
-	auto d = GCD(n2 % n1, n1, x1, y1);
-	x = y1 - n2 / n1 * x1;
-	y = x1;
-	return d;
+	return t;
 }
 
 bool BigInt::IsPrime(const BigInt& other)
@@ -391,14 +396,23 @@ std::string BigInt::ToString() const
 
 BigInt BigInt::GetInverseElementModulo(const BigInt& n1, const BigInt& n2)
 {
-	if (n1 < BigInt("1") || n2 <= BigInt("1"))
-		throw "n1 must be >=1, n2 must be >1";
-	auto x = BigInt("0");
-	auto y = BigInt("0");
-	auto gcd = GCD(n1, n2, x, y);
-	if (Abs(gcd) != BigInt("1"))
-		throw "Numbers must be simple";
-	return (x % n2 + n2) % n2;
+	BigInt ta = n1;
+	BigInt tm = n2;
+	BigInt m0 = tm;
+	BigInt y = 0, x = 1;
+	if (tm == 1)
+		return 0;
+	while (ta > 1) {
+		BigInt q = ta / tm;
+		BigInt t = tm;
+		tm = ta % tm, ta = t;
+		t = y;
+		y = x - q * y;
+		x = t;
+	}
+	if (x < 0)
+		x = x + m0;
+	return x;
 }
 
 bool BigInt::operator==(const BigInt& other) const

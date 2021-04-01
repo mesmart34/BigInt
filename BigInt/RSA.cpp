@@ -1,21 +1,15 @@
 #include "RSA.h"
 
-RSA::RSA(const BigInt& _p, const BigInt& _q)
+RSA::RSA(const BigInt& a, const BigInt& b)
 {
-	auto p = _p;
-	auto q = _q;
-	if (p.GetSign() < 0 || q.GetSign() < 0)
-		throw "Numbers must be positive";
-	if (!BigInt::IsPrime(p) || !BigInt::IsPrime(q))
-		throw "Numbers must be simple";
+	auto p = a;
+	auto q = b;
 	n = p * q;
-	auto fi = (p - BigInt("1")) * (q - BigInt("1"));
-	auto x = BigInt("0");
-	auto y = BigInt("0");
-	e = fi - BigInt("1");
-	while (!(BigInt::IsPrime(e) && BigInt::GCD(e, fi, x, y) == BigInt("1")))
-		e -= BigInt("2");
-	d = BigInt::GetInverseElementModulo(e, fi);
+	auto t = (p - 1) * (q - 1);
+	e = t - 1;
+	while (!(BigInt::GCD(e, t) == 1 && BigInt::IsPrime(e)))
+		e = e - 2;
+	d = BigInt::GetInverseElementModulo(e, t);
 }
 
 std::vector<BigInt> RSA::Encode(const string& msg, const BigInt& e, const BigInt& n)

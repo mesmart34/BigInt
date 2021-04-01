@@ -46,10 +46,19 @@ static void DecodeFromFileToFile()
 	auto b2 = string();
 	cin >> b2;
 	auto n = BigInt(b2);
-	auto encoded = ReadFromFile("encoded.txt");
+
+	auto filename = string();
+	cout << "Enter filename of encrypted file..." << endl;
+	getline(cin >> std::ws, filename);
+
+
+	auto encoded = ReadFromFile(filename);
+	cout << "Enter filename for decrypting..." << endl;
+	getline(cin >> std::ws, filename);
+
 	auto decoded = RSA::Decode(encoded, b, n);
-	WriteToFile("decoded.txt", {decoded});
-	cout << "Output has been written to \"decoded.txt\"" << endl;
+	WriteToFile(filename, {decoded});
+	cout << "Output has been written to \"" + filename + "\"" << endl;
 }
 
 static void EncodeToFile()
@@ -68,6 +77,10 @@ static void EncodeToFile()
 	getline(cin >> std::ws, primeString);
 	auto prime2 = BigInt(primeString);
 
+	auto filename = string();
+	cout << "Enter filename..." << endl;
+	getline(cin >> std::ws, filename);
+
 	//RSA Init
 	auto rsa = RSA(prime1, prime2);
 	auto closeKeys = rsa.GetCloseKeys();
@@ -78,14 +91,14 @@ static void EncodeToFile()
 	
 	//Encoding
 	auto encoded = RSA::Encode(msg, get<0>(openKeys), get<1>(openKeys));
-	cout << "Encoded message has been written to \'encoded.txt\'" << endl;
+	cout << "Encoded message has been written to \'" + filename + "\'" << endl;
 
 	//Writing encoded message to a file
 	auto encodedStrings = vector<string>();
 	for (auto enc : encoded)
 		encodedStrings.push_back(enc.ToString() + " ");
 
-	WriteToFile("encoded.txt", encodedStrings);
+	WriteToFile(filename, encodedStrings);
 
 }
 
